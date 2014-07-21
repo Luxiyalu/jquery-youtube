@@ -5,6 +5,7 @@
 1. Wraps up YouTube iFrame API with jQuery access ```$('#ytplayer').play()```
 2. Lays out events by name instead of the original state change 1, 2, 3... (```onReady, onStart, onPause, onEnd...```)
 3. Adds API for full-screen feature ```$('#player').toggleFullScreen()```
+4. Adds a patch for the wmode issue
 
 ## How to use
 
@@ -80,6 +81,11 @@ pause()                         // pauses video
 stop()                          // stops video
 clear()                         // Clears the video display. This function is useful if you want to clear the video remnant after calling stopVideo()
 seekTo(seconds:Number, allowSeekAhead:Boolean) // Seeks to a specified time in the video. If the player is paused when the function is called, it will remain paused.
+
+// Fullscreen feature
+enterFullscreen()               // enters fullscreen
+exitFullscreen()                // exits fullscreen
+toggleFullscreen()              // toggles fullscreen
 
 // Changing the player volume
 mute()                          // mutes the player

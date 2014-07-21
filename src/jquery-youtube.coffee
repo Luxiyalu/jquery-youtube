@@ -30,8 +30,7 @@ do (window, $ = window.jQuery) ->
     
   # Lazy load in the required iframeAPI script from youtube
   tag = document.createElement('script')
-  # tag.src = "https://www.youtube.com/iframe_api"
-  tag.src = 'scripts/api.js'
+  tag.src = "https://www.youtube.com/iframe_api"
   firstScriptTag = document.getElementsByTagName('script')[0]
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
     

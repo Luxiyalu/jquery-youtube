@@ -1,5 +1,7 @@
 # jquery-youtube
 
+## What it doesmo
+
 1. Wraps up YouTube iFrame API with jQuery access ```$('#ytplayer').play()```
 2. Lays out events by name instead of the original state change 1, 2, 3... (```onReady, onStart, onPause, onEnd...```)
 3. Adds API for full-screen feature ```$('#player').toggleFullScreen()```
@@ -59,7 +61,7 @@ $('#ytplayer').YTplayer({
         fs: 1,                  // Values: 0 or 1. The default value is 1, which causes the fullscreen button to display. Setting this parameter to 0 prevents the fullscreen button from displaying
         hl: 'en',               // Sets the player's interface language
         iv_load_policy: 3,      // Values: 1 or 3. Default is 1. Setting to 1 will cause video annotations to be shown by default, whereas setting to 3 will cause video annotations to not be shown by default
-        modestbranding: 1,
+        modestbranding: 1,      // This parameter lets you use a YouTube player that does not show a YouTube logo. Set the parameter value to 1 to prevent the YouTube logo from displaying in the control bar
         showinfo: 0,            // This parameter lets you use a YouTube player that does not show a YouTube logo. Set the parameter value to 1 to prevent the YouTube logo from displaying in the control bar
         origin: '',             // This parameter provides an extra security measure for the IFrame API and is only supported for IFrame embeds. If you are using the IFrame API, which means you are setting the enablejsapi parameter value to 1, you should always specify your domain as the origin parameter value
         playsinline: 0,         // This parameter controls whether videos play inline or fullscreen in an HTML5 player on iOS

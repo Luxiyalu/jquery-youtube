@@ -16,7 +16,7 @@
 
 #### CSS
 ```css
-/* If you want the full-screen API to work, add this in your stylesheet: */
+/* If you want the full-screen API to work, add this to your stylesheet: */
 :-webkit-full-screen{
     top: 0;
     width: 100%;

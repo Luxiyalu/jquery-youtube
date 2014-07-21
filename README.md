@@ -1,6 +1,6 @@
 # jquery-youtube
 
-## What it doesmo
+## What it does
 
 1. Wraps up YouTube iFrame API with jQuery access ```$('#ytplayer').play()```
 2. Lays out events by name instead of the original state change 1, 2, 3... (```onReady, onStart, onPause, onEnd...```)

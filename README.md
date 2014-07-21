@@ -11,7 +11,7 @@
 #### HTML
 ```html
 <!-- If you want the full-screen API, add a container div -->
-<div class="random-class-name">
+<div class="video-container">
     <div id="ytplayer"></div>
 </div>
 ```

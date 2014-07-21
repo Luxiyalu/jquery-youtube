@@ -34,6 +34,9 @@ iframe{
 #### JavaScript
 ```javascript
 // Initiating
+$('#ytplayer').YTplayer({});
+
+// With preferences
 $('#ytplayer').YTplayer({
     // Basic setting
     width: 1000,                // video width
@@ -57,17 +60,16 @@ $('#ytplayer').YTplayer({
         controls: 0,            // Values: 0 (do not display), 1, or 2. Default is 1. This parameter indicates whether the video player controls will display
         disablekb: 0,           // Values: 0 or 1. Default is 0. Setting to 1 will disable the player keyboard controls
         enablejsapi: 0,         // Values: 0 or 1. Default is 0. Setting this to 1 will enable the Javascript API
-        end: 10,                // Values: A positive integer. This parameter specifies the time, measured in seconds from the start of the video, when the player should stop playing the video
+        end: number,            // Values: A positive integer. This parameter specifies the time, measured in seconds from the start of the video, when the player should stop playing the video
         fs: 1,                  // Values: 0 or 1. The default value is 1, which causes the fullscreen button to display. Setting this parameter to 0 prevents the fullscreen button from displaying
         hl: 'en',               // Sets the player's interface language
         iv_load_policy: 3,      // Values: 1 or 3. Default is 1. Setting to 1 will cause video annotations to be shown by default, whereas setting to 3 will cause video annotations to not be shown by default
         modestbranding: 1,      // This parameter lets you use a YouTube player that does not show a YouTube logo. Set the parameter value to 1 to prevent the YouTube logo from displaying in the control bar
-        showinfo: 0,            // This parameter lets you use a YouTube player that does not show a YouTube logo. Set the parameter value to 1 to prevent the YouTube logo from displaying in the control bar
         origin: '',             // This parameter provides an extra security measure for the IFrame API and is only supported for IFrame embeds. If you are using the IFrame API, which means you are setting the enablejsapi parameter value to 1, you should always specify your domain as the origin parameter value
         playsinline: 0,         // This parameter controls whether videos play inline or fullscreen in an HTML5 player on iOS
         rel: 1,                 // Values: 0 or 1. Default is 1. This parameter indicates whether the player should show related videos when playback of the initial video ends
         showinfo: 1,            // Values: 0 or 1. The parameter's default value is 1. If you set the parameter value to 0, then the player will not display information like the video title and uploader before the video starts playing
-        start: 10,              // Values: A positive integer. This parameter causes the player to begin playing the video at the given number of seconds from the start of the video
+        start: number,          // Values: A positive integer. This parameter causes the player to begin playing the video at the given number of seconds from the start of the video
         theme: 'dark',          // This parameter indicates whether the embedded player will display player controls (like a play button or volume control) within a dark or light control bar. Valid parameter values are dark and light
         
         // full reference: https://developers.google.com/youtube/player_parameters.html?playerVersion=HTML5

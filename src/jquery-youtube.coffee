@@ -40,7 +40,12 @@ do (window, $ = window.jQuery) ->
     $.YTplayers[id].initialized = false
     
   initializeVideo = (id, options) ->
+    # deals with the video floating on top of everything bug
+    options.playerVars = options.playerVars || {}
+    options.playerVars.wmode = 'transparent'
+
     window.player = new YT.Player id,
+      wmode: 'transparent'
       width: options.width
       height: options.height
       videoId: options.videoId
@@ -63,8 +68,6 @@ do (window, $ = window.jQuery) ->
         
     $.YTplayers[id] = player
     $("##{id}").data('YTplayer', player)
-    $("##{id}").parent().css(width: options.width, height: options.height)
-    # console.log $.YTplayers
     
   # Preparation for the event
   window.onYouTubeIframeAPIReady = ->
@@ -152,8 +155,8 @@ do (window, $ = window.jQuery) ->
       exitFullscreen(ele)
         
   $::enterFullscreen = ->
-    enterFullscreen($(this).parent()[0])
+    enterFullscreen($(this)[0])
   $::exitFullscreen = ->
-    exitFullscreen($(this).parent()[0])
+    exitFullscreen($(this)[0])
   $::toggleFullscreen = ->
-    toggleFullscreen($(this).parent()[0])
+    toggleFullscreen($(this)[0])

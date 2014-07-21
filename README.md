@@ -11,9 +11,7 @@
 #### HTML
 ```html
 <!-- If you want the full-screen API, add a container div -->
-<div class="video-container">
-    <div id="ytplayer"></div>
-</div>
+<div id="ytplayer"></div>
 ```
 
 #### CSS
@@ -21,13 +19,9 @@
 /* If you want the full-screen API to work, add this in your stylesheet: */
 :-webkit-full-screen{
     top: 0;
-    width: 100% !important;
-    height: 100% !important;
-    position: absolute !important;
-}
-iframe{
     width: 100%;
     height: 100%;
+    position: absolute;
 }
 ```
 
@@ -42,7 +36,7 @@ $('#ytplayer').YTplayer({
     width: 1000,                // video width
     height: 560,                // video height
     videoId: 'n4JD-3-UAzM',     // youtube video id
-    
+
     // Events
     onReady: function(){},      // on video ready
     onStart: function(){},      // on video start
@@ -70,10 +64,9 @@ $('#ytplayer').YTplayer({
         rel: 1,                 // Values: 0 or 1. Default is 1. This parameter indicates whether the player should show related videos when playback of the initial video ends
         showinfo: 1,            // Values: 0 or 1. The parameter's default value is 1. If you set the parameter value to 0, then the player will not display information like the video title and uploader before the video starts playing
         start: number,          // Values: A positive integer. This parameter causes the player to begin playing the video at the given number of seconds from the start of the video
-        theme: 'dark',          // This parameter indicates whether the embedded player will display player controls (like a play button or volume control) within a dark or light control bar. Valid parameter values are dark and light
-        
-        // full reference: https://developers.google.com/youtube/player_parameters.html?playerVersion=HTML5
+        theme: 'dark'           // This parameter indicates whether the embedded player will display player controls (like a play button or volume control) within a dark or light control bar. Valid parameter values are dark and light
     }
+    // full reference: https://developers.google.com/youtube/player_parameters.html?playerVersion=HTML5
 });
 ```
 

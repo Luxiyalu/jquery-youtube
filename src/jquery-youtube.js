@@ -16,7 +16,10 @@
       return $.YTplayers[id].initialized = false;
     };
     initializeVideo = function(id, options) {
+      options.playerVars = options.playerVars || {};
+      options.playerVars.wmode = 'transparent';
       window.player = new YT.Player(id, {
+        wmode: 'transparent',
         width: options.width,
         height: options.height,
         videoId: options.videoId,
@@ -47,11 +50,7 @@
         }
       });
       $.YTplayers[id] = player;
-      $("#" + id).data('YTplayer', player);
-      return $("#" + id).parent().css({
-        width: options.width,
-        height: options.height
-      });
+      return $("#" + id).data('YTplayer', player);
     };
     window.onYouTubeIframeAPIReady = function() {
       var id, value, _ref, _results;
@@ -140,13 +139,13 @@
       }
     };
     $.prototype.enterFullscreen = function() {
-      return enterFullscreen($(this).parent()[0]);
+      return enterFullscreen($(this)[0]);
     };
     $.prototype.exitFullscreen = function() {
-      return exitFullscreen($(this).parent()[0]);
+      return exitFullscreen($(this)[0]);
     };
     return $.prototype.toggleFullscreen = function() {
-      return toggleFullscreen($(this).parent()[0]);
+      return toggleFullscreen($(this)[0]);
     };
   })(window, window.jQuery);
 

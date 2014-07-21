@@ -11,7 +11,6 @@
 
 #### HTML
 ```html
-<!-- If you want the full-screen API, add a container div -->
 <div id="ytplayer"></div>
 ```
 
@@ -31,7 +30,7 @@
 // Initiating
 $('#ytplayer').YTplayer({});
 
-// With preferences
+// With configurations
 $('#ytplayer').YTplayer({
     // Basic setting
     width: 1000,                // video width

@@ -1,11 +1,15 @@
 # jquery-youtube
 
 ## What it does
-
 1. Wraps up YouTube iFrame API with jQuery access ```$('#ytplayer').play()```
 2. Lays out events by name instead of the original state change 1, 2, 3... (```onReady, onStart, onPause, onEnd...```)
 3. Adds API for full-screen feature ```$('#player').toggleFullScreen()```
 4. Adds a patch for the wmode issue
+
+## How to install
+```
+bower install jquery-youtube
+```
 
 ## How to use
 

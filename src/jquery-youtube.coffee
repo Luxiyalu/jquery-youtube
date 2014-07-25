@@ -1,6 +1,6 @@
 # Youtube-jQuery: create iFrame player with jQuery
 # 
-# Version 0.0.1
+# Version 0.1.0
 # 
 # https://github.com/Luxiyalu/youtube-jquery
 # 
@@ -35,7 +35,6 @@ do (window, $ = window.jQuery) ->
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
     
   pushToQueue = (id, options) ->
-    $.YTplayers = $.YTplayers || {}
     $.YTplayers[id] = options
     $.YTplayers[id].initialized = false
     
@@ -95,6 +94,8 @@ do (window, $ = window.jQuery) ->
     } = options
     
     # push to queue, or initialize right away
+    $.YTplayers = $.YTplayers || {}
+    
     if !youTubeIframeAPIReady
       pushToQueue(@id, this)
     else

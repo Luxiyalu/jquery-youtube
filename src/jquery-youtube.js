@@ -11,7 +11,6 @@
     firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
     pushToQueue = function(id, options) {
-      $.YTplayers = $.YTplayers || {};
       $.YTplayers[id] = options;
       return $.YTplayers[id].initialized = false;
     };
@@ -75,6 +74,7 @@
       this.videoId = options.videoId || 'fz4MzJTeL0c';
       this.playerVars = options.playerVars;
       this.onReady = options.onReady, this.onStateChange = options.onStateChange, this.onStart = options.onStart, this.onEnd = options.onEnd, this.onPlay = options.onPlay, this.onPause = options.onPause, this.onBuffer = options.onBuffer, this.onPlaybackQualityChange = options.onPlaybackQualityChange, this.onPlaybackRateChange = options.onPlaybackRateChange, this.onError = options.onError, this.onApiChange = options.onApiChange;
+      $.YTplayers = $.YTplayers || {};
       if (!youTubeIframeAPIReady) {
         return pushToQueue(this.id, this);
       } else {

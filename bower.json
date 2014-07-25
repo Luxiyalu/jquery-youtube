@@ -1,8 +1,9 @@
 {
   "name": "jquery-youtube",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "lib/youtube-jquery.js",
   "dependencies": {
     "jquery": ">=1.11.0"
-  }
+  },
+  "ignore": []
 }

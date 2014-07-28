@@ -135,9 +135,9 @@ do (window, $ = window.jQuery) ->
     if document.documentElement.requestFullscreen
       ele.requestFullscreen()
     else
-      ele.msRequestFullScreen?()
+      ele.msRequestFullscreen?()
       ele.mozRequestFullScreen?()
-      ele.webkitRequestFullScreen?(Element.ALLOW_KEYBOARD_INPUT)
+      ele.webkitRequestFullscreen?(Element.ALLOW_KEYBOARD_INPUT)
       
   exitFullscreen = (ele) ->
     if document.exitFullscreen

@@ -109,13 +109,13 @@
       if (document.documentElement.requestFullscreen) {
         return ele.requestFullscreen();
       } else {
-        if (typeof ele.msRequestFullScreen === "function") {
-          ele.msRequestFullScreen();
+        if (typeof ele.msRequestFullscreen === "function") {
+          ele.msRequestFullscreen();
         }
         if (typeof ele.mozRequestFullScreen === "function") {
           ele.mozRequestFullScreen();
         }
-        return typeof ele.webkitRequestFullScreen === "function" ? ele.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT) : void 0;
+        return typeof ele.webkitRequestFullscreen === "function" ? ele.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT) : void 0;
       }
     };
     exitFullscreen = function(ele) {

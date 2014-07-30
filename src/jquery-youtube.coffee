@@ -148,13 +148,17 @@ do (window, $ = window.jQuery) ->
       document.webkitExitFullscreen?()
       
   toggleFullscreen = (ele) ->
-    if !document.fullScreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement
+    if !$.fullscreenElement()
       # doesn't have full screen element yet
       enterFullscreen(ele)
+      $(ele).addClass('ytplayer-fullscreen')
     else
       # some element is already full-screened
       exitFullscreen(ele)
+      $(ele).removeClass('ytplayer-fullscreen')
         
+  $.fullscreenElement = ->
+    ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement
   $::enterFullscreen = ->
     enterFullscreen($(this)[0])
   $::exitFullscreen = ->

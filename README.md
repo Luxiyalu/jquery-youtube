@@ -86,9 +86,11 @@ clear()                         // Clears the video display. This function is us
 seekTo(seconds:Number, allowSeekAhead:Boolean) // Seeks to a specified time in the video. If the player is paused when the function is called, it will remain paused.
 
 // Fullscreen feature
-enterFullscreen()               // enters fullscreen
-exitFullscreen()                // exits fullscreen
-toggleFullscreen()              // toggles fullscreen
+$('element').enterFullscreen()	 // enters fullscreen
+$('element').exitFullscreen()	 // exits fullscreen
+$('element').toggleFullscreen() // toggles fullscreen
+$.fullscreenElement()			 // returns the fullscreen element (in javascript), or returns null
+// the fullscreen-ed element will have a ```ytplayer-fullscreen``` class while it is in fullscreen mode
 
 // Changing the player volume
 mute()                          // mutes the player

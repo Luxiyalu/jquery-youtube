@@ -132,11 +132,17 @@
       }
     };
     toggleFullscreen = function(ele) {
-      if (!document.fullScreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-        return enterFullscreen(ele);
+      if (!$.fullscreenElement()) {
+        enterFullscreen(ele);
+        return $(ele).addClass('ytplayer-fullscreen');
       } else {
-        return exitFullscreen(ele);
+        exitFullscreen(ele);
+        return $(ele).removeClass('ytplayer-fullscreen');
       }
+    };
+    $.fullscreenElement = function() {
+      var ele;
+      return ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
     };
     $.prototype.enterFullscreen = function() {
       return enterFullscreen($(this)[0]);

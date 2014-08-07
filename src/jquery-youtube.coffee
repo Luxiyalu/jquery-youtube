@@ -1,9 +1,7 @@
 # Youtube-jQuery: create iFrame player with jQuery
 # 
 # Version 0.1.0
-# 
 # https://github.com/Luxiyalu/youtube-jquery
-# 
 # Copyright (c) 2010-2014 Lucia Lu
 # 
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -26,56 +24,137 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 do (window, $ = window.jQuery) ->
-  youTubeIframeAPIReady = false
+  jyt = jyt || {}
+  jyt.init = (feature) ->
+    @ApiReady = false
     
-  # Lazy load in the required iframeAPI script from youtube
-  tag = document.createElement('script')
-  tag.src = "https://www.youtube.com/iframe_api"
-  firstScriptTag = document.getElementsByTagName('script')[0]
-  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+    # platform detect
+    ua = window.navigator.userAgent.toLowerCase()
+    @platform =
+      isIE8: ua.match(/msie 8/) isnt null
+      isIE9: ua.match(/msie 9/) isnt null
+      
+    # feature detect
+    @feature = feature || if (@platform.isIE8 || @platform.isIE9) then 'flash' else 'iframe'
+      
+    do @[@feature].init
+    do @registerPackage
+      
+  jyt.onApiReady = ->
+    @ApiReady = true
     
-  pushToQueue = (id, options) ->
-    $.YTplayers[id] = options
-    $.YTplayers[id].initialized = false
+    # load all the players in the queue
+    for own id, value of @YTplayers
+      value = @[@feature].initializeVideo(id, value) if !value.initialized
+      
+  jyt.pushToQueue = (id, options) ->
+    @YTplayers[id] = options
+    @YTplayers[id].initialized = false
     
-  initializeVideo = (id, options) ->
-    # deals with the video floating on top of everything bug
-    options.playerVars = options.playerVars || {}
-    options.playerVars.wmode = 'transparent'
+  jyt.util =
+    objToUrl: (obj) ->
+      i = 0
+      string = ""
+      for own key, value of obj
+        link = if i is 0 then "?" else "&"
+        string += "#{link}#{key}=#{value}"
+        i++
+      string
+      
+  jyt.iframe =
+    init: ->
+      
+      # Register onReady event
+      window.onYouTubeIframeAPIReady = =>
+        jyt.onApiReady()
+        
+      # Lazy load in the required iframeAPI script from youtube
+      tag = document.createElement('script')
+      tag.src = "https://www.youtube.com/iframe_api"
+      firstScriptTag = document.getElementsByTagName('script')[0]
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+      
+    initializeVideo: (id, options) ->
+      options.playerVars = options.playerVars || {}
+      options.playerVars.wmode = 'transparent'
+      options.playerVars.html5 = 1 # force flash when both flash and html5 are available
+      
+      player = new YT.Player id,
+        wmode: 'transparent'
+        width: options.width
+        height: options.height
+        videoId: options.videoId
+        playerVars: options.playerVars
+        # reference: https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
+        events:
+          onReady: options.onReady
+          onStateChange: (e) ->
+            options.onStateChange?(e)
+            switch e.data
+              when 0 then options.onEnd?(e)
+              when 1 then options.onPlay?(e)
+              when 2 then options.onPause?(e)
+              when 3 then options.onBuffer?(e)
+          onPlaybackQualityChange: options.onPlaybackQualityChange
+          onPlaybackRateChange: options.onPlaybackRateChange
+          onApiChange: options.onApiChange
+          onError: options.onError
+      jyt.YTplayers[id] = player
 
-    window.player = new YT.Player id,
-      wmode: 'transparent'
-      width: options.width
-      height: options.height
-      videoId: options.videoId
-      playerVars: options.playerVars
-      # reference: https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
-      events:
-        onReady: options.onReady
-        onStateChange: (e) ->
+  jyt.flash =
+    init: ->
+      
+      # Lazy load in the required swfoBject script from youtube
+      tag = document.createElement('script')
+      tag.onload = () ->
+        jyt.onApiReady()
+        
+      tag.src = "http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"
+      firstScriptTag = document.getElementsByTagName('script')[0]
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+      
+    initializeVideo: (id, options) ->
+      
+      options.playerVars = options.playerVars || {}
+      options.playerVars.wmode = 'transparent'
+      options.playerVars.version = 3
+      options.playerVars.enablejsapi = 1
+      options.playerVars.playerapiid = options.videoId
+      
+      urlParam = jyt.util.objToUrl(options.playerVars)
+      swfobject.embedSWF "http://www.youtube.com/v/#{options.videoId}#{urlParam}",
+        id, options.width, options.height, "8", null, null,
+        {allowScriptAccess: 'always'}, {id: id}
+        
+      # Register onReady event
+      window.onYouTubePlayerReady = (videoId) ->
+        
+        # bind events
+        player = document.getElementById(id)
+        window["#{id}OnStateChange"] = (e) ->
           options.onStateChange?(e)
-          switch e.data
-            when -1 then options.onStart?(e)
+          switch e
+            when -1 then options.onReady?(e)
             when 0 then options.onEnd?(e)
             when 1 then options.onPlay?(e)
             when 2 then options.onPause?(e)
             when 3 then options.onBuffer?(e)
-        onPlaybackQualityChange: options.onPlaybackQualityChange
-        onPlaybackRateChange: options.onPlaybackRateChange
-        onApiChange: options.onApiChange
-        onError: options.onError
+        window["#{id}OnError"] = (e) -> options.onError?(e)
+        window["#{id}OnApiChange"] = (e) -> options.onApiChange?(e)
+        window["#{id}OnPlaybackRateChange"] = (e) -> options.onPlaybackRateChange?(e)
+        window["#{id}OnPlaybackQualityChange"] = (e) -> options.onPlaybackQualityChange?(e)
         
-    $.YTplayers[id] = player
-    $("##{id}").data('YTplayer', player)
+        player.addEventListener('onError', "#{id}OnError")
+        player.addEventListener('onApiChange', "#{id}OnApiChange")
+        player.addEventListener('onStateChange', "#{id}OnStateChange")
+        player.addEventListener('onPlaybackRateChange', "#{id}OnPlaybackRateChange")
+        player.addEventListener('onPlaybackQualityChange', "#{id}OnPlaybackQualityChange")
+        # don't listen to anonymous function here, because it has to be called
+        # from within flash. It needs a string.
+        jyt.YTplayers[id] = player
+        window.player = player
+        return
     
-  # Preparation for the event
-  window.onYouTubeIframeAPIReady = ->
-    youTubeIframeAPIReady = true
-    # load all the players
-    for own id, value of $.YTplayers
-      if !value.initialized
-        value = initializeVideo(id, value)
-        
   # Initialise with jQuery
   $::YTplayer = (options) ->
     # Default options
@@ -94,74 +173,90 @@ do (window, $ = window.jQuery) ->
     } = options
     
     # push to queue, or initialize right away
-    $.YTplayers = $.YTplayers || {}
+    jyt.YTplayers = jyt.YTplayers || {}
     
-    if !youTubeIframeAPIReady
-      pushToQueue(@id, this)
+    if jyt.ApiReady
+      jyt[jyt.feature].initializeVideo(@id, this)
     else
-      initializeVideo(@id, this)
+      jyt.pushToQueue(@id, this)
       
   ## APIs
   # reference here: https://developers.google.com/youtube/iframe_api_reference
+  jyt.registerPackage = ->
     
-  # abstraction
-  registerPackage = (alias, name = alias) ->
-    $::[alias] = (args...) ->
-      player = $(this).data('YTplayer')
-      return if player is undefined
-      player[name]?.apply(player, args)
-      
-  # play related
-  registerPackage('play', 'playVideo')
-  registerPackage('pause', 'pauseVideo')
-  registerPackage('stop', 'stopVideo')
-  registerPackage('clear', 'clearVideo')
-  registerPackage('seekTo')
-    
-  for fn in [
-    'setSize', # player size
-    'mute', 'unMute', 'isMuted', 'setVolume', 'getVolume', # volume related
-    'getVideoLoadedFraction', 'getPlayerState', 'getCurrentTime', # playback status
-    'setPlaybackRate', 'getPlaybackRate', 'getAvailablePlaybackRate', # playback rate
-    'getPlaybackQuality', 'setPlaybackQuality', 'getAvailableQualityLevels', # playback quality
-    'getDuration', 'getVideoUrl', 'getVideoEmbedCode', # retrieving video info
-    'addEventListener', 'removeEventListener', # events
-    'getIframe', 'destroy', # Accessing and modifying DOM nodes
-  ]
-    registerPackage(fn)
-    
-  # add API for fullscreen
-  enterFullscreen = (ele) ->
-    if document.documentElement.requestFullscreen
-      ele.requestFullscreen()
-    else
-      ele.msRequestFullscreen?()
-      ele.mozRequestFullScreen?()
-      ele.webkitRequestFullscreen?(Element.ALLOW_KEYBOARD_INPUT)
-      
-  exitFullscreen = (ele) ->
-    if document.exitFullscreen
-      document.exitFullscreen()
-    else
-      document.msExitFullscreen?()
-      document.mozCancelFullScreen?()
-      document.webkitExitFullscreen?()
-      
-  toggleFullscreen = (ele) ->
-    if !$.fullscreenElement()
-      # doesn't have full screen element yet
-      enterFullscreen(ele)
-      $(ele).addClass('ytplayer-fullscreen')
-    else
-      # some element is already full-screened
-      exitFullscreen(ele)
-      $(ele).removeClass('ytplayer-fullscreen')
+    # abstraction
+    @registerPackage = (alias, name = alias) ->
+      $::[alias] = (args...) ->
+        id = $(this).attr('id')
+        player = jyt.YTplayers[id]
+        return if player is undefined
+        return if player.initialized is false
+        player[name]?.apply(player, args)
         
-  $.fullscreenElement = ->
-    ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement
-  $::enterFullscreen = ->
-    enterFullscreen($(this)[0])
-  $::exitFullscreen = ->
-    exitFullscreen($(this)[0])
-  $::toggleFullscreen = ->
-    toggleFullscreen($(this)[0])
+    # play related
+    @registerPackage('play', 'playVideo')
+    @registerPackage('pause', 'pauseVideo')
+    @registerPackage('stop', 'stopVideo')
+    @registerPackage('clear', 'clearVideo')
+    @registerPackage('seekTo')
+      
+    for fn in [
+      'setSize', # player size
+      'mute', 'unMute', 'isMuted', 'setVolume', 'getVolume', # volume related
+      'getVideoLoadedFraction', 'getPlayerState', 'getCurrentTime', # playback status
+      'setPlaybackRate', 'getPlaybackRate', 'getAvailablePlaybackRate', # playback rate
+      'getPlaybackQuality', 'setPlaybackQuality', 'getAvailableQualityLevels', # playback quality
+      'getDuration', 'getVideoUrl', 'getVideoEmbedCode', # retrieving video info
+      'addEventListener', 'removeEventListener', # events
+      'getIframe', 'destroy', # Accessing and modifying DOM nodes
+    ]
+      @registerPackage(fn)
+      
+    # add API for fullscreen
+    enterFullscreen = (ele) ->
+      if document.documentElement.requestFullscreen
+        ele.requestFullscreen()
+      else
+        ele.msRequestFullscreen?()
+        ele.mozRequestFullScreen?()
+        ele.webkitRequestFullscreen?(Element.ALLOW_KEYBOARD_INPUT)
+        
+    exitFullscreen = (ele) ->
+      if document.exitFullscreen
+        document.exitFullscreen()
+      else
+        document.msExitFullscreen?()
+        document.mozCancelFullScreen?()
+        document.webkitExitFullscreen?()
+        
+    toggleFullscreen = (ele) ->
+      if !$.fullscreenElement()
+        # doesn't have full screen element yet
+        enterFullscreen(ele)
+        $(ele).addClass('ytplayer-fullscreen')
+      else
+        # some element is already full-screened
+        exitFullscreen(ele)
+        $(ele).removeClass('ytplayer-fullscreen')
+
+    # fix esc exit
+    $(document).on 'keyup', (e) ->
+      if e.which is 27 && $('.ytplayer-fullscreen').length > 0
+        $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen')
+
+    # fix for firefox since it doesn't detect esc keystroke when fullscreen
+    $(window).on 'resize', ->
+      if $.fullscreenElement()
+        $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen')
+
+          
+    $.fullscreenElement = ->
+      ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement
+    $::enterFullscreen = ->
+      enterFullscreen($(this)[0])
+    $::exitFullscreen = ->
+      exitFullscreen($(this)[0])
+    $::toggleFullscreen = ->
+      toggleFullscreen($(this)[0])
+    
+  jyt.init()

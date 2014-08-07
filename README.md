@@ -5,6 +5,8 @@
 2. Lays out events by name instead of the original state change 1, 2, 3... (```onReady, onStart, onPause, onEnd...```)
 3. Adds API for full-screen feature ```$('#player').toggleFullScreen()```
 4. Adds a patch for the wmode issue
+5. Ensured API compatibility for IE10
+5. Solves bug on OSX Safari, when user had installed flash previously
 
 ## How to install
 ```
@@ -20,12 +22,25 @@ bower install jquery-youtube
 
 #### CSS
 ```css
-/* If you want the full-screen API to work, add this to your stylesheet: */
+/* If you want the full-screen API to work across platforms, add this to your stylesheet: */
 :-webkit-full-screen{
     top: 0;
     width: 100%;
     height: 100%;
     position: absolute;
+}
+.ytplayer-fullscreen{
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100% !important;
+    #player-id{
+        width: 100% !important;
+        height: 100% !important;
+    }
 }
 ```
 

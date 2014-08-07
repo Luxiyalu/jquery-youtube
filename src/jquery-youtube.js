@@ -4,34 +4,139 @@
     __slice = [].slice;
 
   (function(window, $) {
-    var enterFullscreen, exitFullscreen, firstScriptTag, fn, initializeVideo, pushToQueue, registerPackage, tag, toggleFullscreen, youTubeIframeAPIReady, _i, _len, _ref;
-    youTubeIframeAPIReady = false;
-    tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-    pushToQueue = function(id, options) {
-      $.YTplayers[id] = options;
-      return $.YTplayers[id].initialized = false;
+    var jyt;
+    jyt = jyt || {};
+    jyt.init = function(feature) {
+      var ua;
+      this.ApiReady = false;
+      ua = window.navigator.userAgent.toLowerCase();
+      this.platform = {
+        isIE8: ua.match(/msie 8/) !== null,
+        isIE9: ua.match(/msie 9/) !== null
+      };
+      this.feature = feature || (this.platform.isIE8 || this.platform.isIE9 ? 'flash' : 'iframe');
+      this[this.feature].init();
+      return this.registerPackage();
     };
-    initializeVideo = function(id, options) {
-      options.playerVars = options.playerVars || {};
-      options.playerVars.wmode = 'transparent';
-      window.player = new YT.Player(id, {
-        wmode: 'transparent',
-        width: options.width,
-        height: options.height,
-        videoId: options.videoId,
-        playerVars: options.playerVars,
-        events: {
-          onReady: options.onReady,
-          onStateChange: function(e) {
+    jyt.onApiReady = function() {
+      var id, value, _ref, _results;
+      this.ApiReady = true;
+      _ref = this.YTplayers;
+      _results = [];
+      for (id in _ref) {
+        if (!__hasProp.call(_ref, id)) continue;
+        value = _ref[id];
+        if (!value.initialized) {
+          _results.push(value = this[this.feature].initializeVideo(id, value));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+    jyt.pushToQueue = function(id, options) {
+      this.YTplayers[id] = options;
+      return this.YTplayers[id].initialized = false;
+    };
+    jyt.util = {
+      objToUrl: function(obj) {
+        var i, key, link, string, value;
+        i = 0;
+        string = "";
+        for (key in obj) {
+          if (!__hasProp.call(obj, key)) continue;
+          value = obj[key];
+          link = i === 0 ? "?" : "&";
+          string += "" + link + key + "=" + value;
+          i++;
+        }
+        return string;
+      }
+    };
+    jyt.iframe = {
+      init: function() {
+        var firstScriptTag, tag;
+        window.onYouTubeIframeAPIReady = (function(_this) {
+          return function() {
+            return jyt.onApiReady();
+          };
+        })(this);
+        tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        firstScriptTag = document.getElementsByTagName('script')[0];
+        return firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      },
+      initializeVideo: function(id, options) {
+        var player;
+        options.playerVars = options.playerVars || {};
+        options.playerVars.wmode = 'transparent';
+        options.playerVars.html5 = 1;
+        player = new YT.Player(id, {
+          wmode: 'transparent',
+          width: options.width,
+          height: options.height,
+          videoId: options.videoId,
+          playerVars: options.playerVars,
+          events: {
+            onReady: options.onReady,
+            onStateChange: function(e) {
+              if (typeof options.onStateChange === "function") {
+                options.onStateChange(e);
+              }
+              switch (e.data) {
+                case 0:
+                  return typeof options.onEnd === "function" ? options.onEnd(e) : void 0;
+                case 1:
+                  return typeof options.onPlay === "function" ? options.onPlay(e) : void 0;
+                case 2:
+                  return typeof options.onPause === "function" ? options.onPause(e) : void 0;
+                case 3:
+                  return typeof options.onBuffer === "function" ? options.onBuffer(e) : void 0;
+              }
+            },
+            onPlaybackQualityChange: options.onPlaybackQualityChange,
+            onPlaybackRateChange: options.onPlaybackRateChange,
+            onApiChange: options.onApiChange,
+            onError: options.onError
+          }
+        });
+        return jyt.YTplayers[id] = player;
+      }
+    };
+    jyt.flash = {
+      init: function() {
+        var firstScriptTag, tag;
+        tag = document.createElement('script');
+        tag.onload = function() {
+          return jyt.onApiReady();
+        };
+        tag.src = "http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js";
+        firstScriptTag = document.getElementsByTagName('script')[0];
+        return firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      },
+      initializeVideo: function(id, options) {
+        var urlParam;
+        options.playerVars = options.playerVars || {};
+        options.playerVars.wmode = 'transparent';
+        options.playerVars.version = 3;
+        options.playerVars.enablejsapi = 1;
+        options.playerVars.playerapiid = options.videoId;
+        urlParam = jyt.util.objToUrl(options.playerVars);
+        swfobject.embedSWF("http://www.youtube.com/v/" + options.videoId + urlParam, id, options.width, options.height, "8", null, null, {
+          allowScriptAccess: 'always'
+        }, {
+          id: id
+        });
+        return window.onYouTubePlayerReady = function(videoId) {
+          var player;
+          player = document.getElementById(id);
+          window["" + id + "OnStateChange"] = function(e) {
             if (typeof options.onStateChange === "function") {
               options.onStateChange(e);
             }
-            switch (e.data) {
+            switch (e) {
               case -1:
-                return typeof options.onStart === "function" ? options.onStart(e) : void 0;
+                return typeof options.onReady === "function" ? options.onReady(e) : void 0;
               case 0:
                 return typeof options.onEnd === "function" ? options.onEnd(e) : void 0;
               case 1:
@@ -41,31 +146,28 @@
               case 3:
                 return typeof options.onBuffer === "function" ? options.onBuffer(e) : void 0;
             }
-          },
-          onPlaybackQualityChange: options.onPlaybackQualityChange,
-          onPlaybackRateChange: options.onPlaybackRateChange,
-          onApiChange: options.onApiChange,
-          onError: options.onError
-        }
-      });
-      $.YTplayers[id] = player;
-      return $("#" + id).data('YTplayer', player);
-    };
-    window.onYouTubeIframeAPIReady = function() {
-      var id, value, _ref, _results;
-      youTubeIframeAPIReady = true;
-      _ref = $.YTplayers;
-      _results = [];
-      for (id in _ref) {
-        if (!__hasProp.call(_ref, id)) continue;
-        value = _ref[id];
-        if (!value.initialized) {
-          _results.push(value = initializeVideo(id, value));
-        } else {
-          _results.push(void 0);
-        }
+          };
+          window["" + id + "OnError"] = function(e) {
+            return typeof options.onError === "function" ? options.onError(e) : void 0;
+          };
+          window["" + id + "OnApiChange"] = function(e) {
+            return typeof options.onApiChange === "function" ? options.onApiChange(e) : void 0;
+          };
+          window["" + id + "OnPlaybackRateChange"] = function(e) {
+            return typeof options.onPlaybackRateChange === "function" ? options.onPlaybackRateChange(e) : void 0;
+          };
+          window["" + id + "OnPlaybackQualityChange"] = function(e) {
+            return typeof options.onPlaybackQualityChange === "function" ? options.onPlaybackQualityChange(e) : void 0;
+          };
+          player.addEventListener('onError', "" + id + "OnError");
+          player.addEventListener('onApiChange', "" + id + "OnApiChange");
+          player.addEventListener('onStateChange', "" + id + "OnStateChange");
+          player.addEventListener('onPlaybackRateChange', "" + id + "OnPlaybackRateChange");
+          player.addEventListener('onPlaybackQualityChange', "" + id + "OnPlaybackQualityChange");
+          jyt.YTplayers[id] = player;
+          window.player = player;
+        };
       }
-      return _results;
     };
     $.prototype.YTplayer = function(options) {
       this.id = $(this).attr('id');
@@ -74,85 +176,103 @@
       this.videoId = options.videoId || 'fz4MzJTeL0c';
       this.playerVars = options.playerVars;
       this.onReady = options.onReady, this.onStateChange = options.onStateChange, this.onStart = options.onStart, this.onEnd = options.onEnd, this.onPlay = options.onPlay, this.onPause = options.onPause, this.onBuffer = options.onBuffer, this.onPlaybackQualityChange = options.onPlaybackQualityChange, this.onPlaybackRateChange = options.onPlaybackRateChange, this.onError = options.onError, this.onApiChange = options.onApiChange;
-      $.YTplayers = $.YTplayers || {};
-      if (!youTubeIframeAPIReady) {
-        return pushToQueue(this.id, this);
+      jyt.YTplayers = jyt.YTplayers || {};
+      if (jyt.ApiReady) {
+        return jyt[jyt.feature].initializeVideo(this.id, this);
       } else {
-        return initializeVideo(this.id, this);
+        return jyt.pushToQueue(this.id, this);
       }
     };
-    registerPackage = function(alias, name) {
-      if (name == null) {
-        name = alias;
-      }
-      return $.prototype[alias] = function() {
-        var args, player, _ref;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        player = $(this).data('YTplayer');
-        if (player === void 0) {
-          return;
+    jyt.registerPackage = function() {
+      var enterFullscreen, exitFullscreen, fn, toggleFullscreen, _i, _len, _ref;
+      this.registerPackage = function(alias, name) {
+        if (name == null) {
+          name = alias;
         }
-        return (_ref = player[name]) != null ? _ref.apply(player, args) : void 0;
+        return $.prototype[alias] = function() {
+          var args, id, player, _ref;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          id = $(this).attr('id');
+          player = jyt.YTplayers[id];
+          if (player === void 0) {
+            return;
+          }
+          if (player.initialized === false) {
+            return;
+          }
+          return (_ref = player[name]) != null ? _ref.apply(player, args) : void 0;
+        };
+      };
+      this.registerPackage('play', 'playVideo');
+      this.registerPackage('pause', 'pauseVideo');
+      this.registerPackage('stop', 'stopVideo');
+      this.registerPackage('clear', 'clearVideo');
+      this.registerPackage('seekTo');
+      _ref = ['setSize', 'mute', 'unMute', 'isMuted', 'setVolume', 'getVolume', 'getVideoLoadedFraction', 'getPlayerState', 'getCurrentTime', 'setPlaybackRate', 'getPlaybackRate', 'getAvailablePlaybackRate', 'getPlaybackQuality', 'setPlaybackQuality', 'getAvailableQualityLevels', 'getDuration', 'getVideoUrl', 'getVideoEmbedCode', 'addEventListener', 'removeEventListener', 'getIframe', 'destroy'];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        fn = _ref[_i];
+        this.registerPackage(fn);
+      }
+      enterFullscreen = function(ele) {
+        if (document.documentElement.requestFullscreen) {
+          return ele.requestFullscreen();
+        } else {
+          if (typeof ele.msRequestFullscreen === "function") {
+            ele.msRequestFullscreen();
+          }
+          if (typeof ele.mozRequestFullScreen === "function") {
+            ele.mozRequestFullScreen();
+          }
+          return typeof ele.webkitRequestFullscreen === "function" ? ele.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT) : void 0;
+        }
+      };
+      exitFullscreen = function(ele) {
+        if (document.exitFullscreen) {
+          return document.exitFullscreen();
+        } else {
+          if (typeof document.msExitFullscreen === "function") {
+            document.msExitFullscreen();
+          }
+          if (typeof document.mozCancelFullScreen === "function") {
+            document.mozCancelFullScreen();
+          }
+          return typeof document.webkitExitFullscreen === "function" ? document.webkitExitFullscreen() : void 0;
+        }
+      };
+      toggleFullscreen = function(ele) {
+        if (!$.fullscreenElement()) {
+          enterFullscreen(ele);
+          return $(ele).addClass('ytplayer-fullscreen');
+        } else {
+          exitFullscreen(ele);
+          return $(ele).removeClass('ytplayer-fullscreen');
+        }
+      };
+      $(document).on('keyup', function(e) {
+        if (e.which === 27 && $('.ytplayer-fullscreen').length > 0) {
+          return $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen');
+        }
+      });
+      $(window).on('resize', function() {
+        if ($.fullscreenElement()) {
+          return $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen');
+        }
+      });
+      $.fullscreenElement = function() {
+        var ele;
+        return ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+      };
+      $.prototype.enterFullscreen = function() {
+        return enterFullscreen($(this)[0]);
+      };
+      $.prototype.exitFullscreen = function() {
+        return exitFullscreen($(this)[0]);
+      };
+      return $.prototype.toggleFullscreen = function() {
+        return toggleFullscreen($(this)[0]);
       };
     };
-    registerPackage('play', 'playVideo');
-    registerPackage('pause', 'pauseVideo');
-    registerPackage('stop', 'stopVideo');
-    registerPackage('clear', 'clearVideo');
-    registerPackage('seekTo');
-    _ref = ['setSize', 'mute', 'unMute', 'isMuted', 'setVolume', 'getVolume', 'getVideoLoadedFraction', 'getPlayerState', 'getCurrentTime', 'setPlaybackRate', 'getPlaybackRate', 'getAvailablePlaybackRate', 'getPlaybackQuality', 'setPlaybackQuality', 'getAvailableQualityLevels', 'getDuration', 'getVideoUrl', 'getVideoEmbedCode', 'addEventListener', 'removeEventListener', 'getIframe', 'destroy'];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      fn = _ref[_i];
-      registerPackage(fn);
-    }
-    enterFullscreen = function(ele) {
-      if (document.documentElement.requestFullscreen) {
-        return ele.requestFullscreen();
-      } else {
-        if (typeof ele.msRequestFullscreen === "function") {
-          ele.msRequestFullscreen();
-        }
-        if (typeof ele.mozRequestFullScreen === "function") {
-          ele.mozRequestFullScreen();
-        }
-        return typeof ele.webkitRequestFullscreen === "function" ? ele.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT) : void 0;
-      }
-    };
-    exitFullscreen = function(ele) {
-      if (document.exitFullscreen) {
-        return document.exitFullscreen();
-      } else {
-        if (typeof document.msExitFullscreen === "function") {
-          document.msExitFullscreen();
-        }
-        if (typeof document.mozCancelFullScreen === "function") {
-          document.mozCancelFullScreen();
-        }
-        return typeof document.webkitExitFullscreen === "function" ? document.webkitExitFullscreen() : void 0;
-      }
-    };
-    toggleFullscreen = function(ele) {
-      if (!$.fullscreenElement()) {
-        enterFullscreen(ele);
-        return $(ele).addClass('ytplayer-fullscreen');
-      } else {
-        exitFullscreen(ele);
-        return $(ele).removeClass('ytplayer-fullscreen');
-      }
-    };
-    $.fullscreenElement = function() {
-      var ele;
-      return ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-    };
-    $.prototype.enterFullscreen = function() {
-      return enterFullscreen($(this)[0]);
-    };
-    $.prototype.exitFullscreen = function() {
-      return exitFullscreen($(this)[0]);
-    };
-    return $.prototype.toggleFullscreen = function() {
-      return toggleFullscreen($(this)[0]);
-    };
+    return jyt.init();
   })(window, window.jQuery);
 
 }).call(this);

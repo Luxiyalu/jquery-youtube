@@ -1,3 +1,5 @@
 config.codekit
 README.html
 *.swp
+*.sublime-project
+*.sublime-workspace

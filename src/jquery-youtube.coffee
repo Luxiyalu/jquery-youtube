@@ -32,15 +32,17 @@ do (window, $ = window.jQuery) ->
     ua = window.navigator.userAgent.toLowerCase()
     @platform =
       isIE8: ua.match(/msie 8/) isnt null
-      isIE9: ua.match(/msie 9/) isnt null
       
     # feature detect
-    @feature = feature || if (@platform.isIE8 || @platform.isIE9) then 'flash' else 'iframe'
+    @feature = feature || if @platform.isIE8 then 'flash' else 'iframe'
       
+    # flash feature would 
+    # if @feature is 'iframe' then @iframe.init()
     do @[@feature].init
     do @registerPackage
       
   jyt.onApiReady = ->
+    console.log @feature, 'API ready, initialize Video.'
     @ApiReady = true
     
     # load all the players in the queue
@@ -63,6 +65,7 @@ do (window, $ = window.jQuery) ->
       
   jyt.iframe =
     init: ->
+      console.log 'init iframe'
       
       # Register onReady event
       window.onYouTubeIframeAPIReady = =>
@@ -76,11 +79,11 @@ do (window, $ = window.jQuery) ->
       
     initializeVideo: (id, options) ->
       options.playerVars = options.playerVars || {}
-      options.playerVars.wmode = 'transparent'
+      options.playerVars.wmode = 'opaque'
       options.playerVars.html5 = 1 # force flash when both flash and html5 are available
       
       player = new YT.Player id,
-        wmode: 'transparent'
+        wmode: 'opaque'
         width: options.width
         height: options.height
         videoId: options.videoId
@@ -91,6 +94,7 @@ do (window, $ = window.jQuery) ->
           onStateChange: (e) ->
             options.onStateChange?(e)
             switch e.data
+              # when -1 then options.onReady?(e)
               when 0 then options.onEnd?(e)
               when 1 then options.onPlay?(e)
               when 2 then options.onPause?(e)
@@ -99,14 +103,18 @@ do (window, $ = window.jQuery) ->
           onPlaybackRateChange: options.onPlaybackRateChange
           onApiChange: options.onApiChange
           onError: options.onError
+      # return player
+      console.log 'video initialized'
       jyt.YTplayers[id] = player
 
   jyt.flash =
     init: ->
+      console.log 'init flash'
       
       # Lazy load in the required swfoBject script from youtube
       tag = document.createElement('script')
       tag.onload = () ->
+        console.log 'swfobject script load'
         jyt.onApiReady()
         
       tag.src = "http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"
@@ -114,9 +122,10 @@ do (window, $ = window.jQuery) ->
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
       
     initializeVideo: (id, options) ->
+      console.log 'flash initialiseVideo'
       
       options.playerVars = options.playerVars || {}
-      options.playerVars.wmode = 'transparent'
+      options.playerVars.wmode = 'opaque'
       options.playerVars.version = 3
       options.playerVars.enablejsapi = 1
       options.playerVars.playerapiid = options.videoId
@@ -128,6 +137,8 @@ do (window, $ = window.jQuery) ->
         
       # Register onReady event
       window.onYouTubePlayerReady = (videoId) ->
+        console.log 'flash onYouTubePlayerReady'
+        # options.onReady?()
         
         # bind events
         player = document.getElementById(id)
@@ -176,8 +187,10 @@ do (window, $ = window.jQuery) ->
     jyt.YTplayers = jyt.YTplayers || {}
     
     if jyt.ApiReady
+      console.log jyt.feature, 'API ready, initialize Video.'
       jyt[jyt.feature].initializeVideo(@id, this)
     else
+      console.log jyt.feature, 'API not ready, queue Video.'
       jyt.pushToQueue(@id, this)
       
   ## APIs
@@ -188,8 +201,8 @@ do (window, $ = window.jQuery) ->
     @registerPackage = (alias, name = alias) ->
       $::[alias] = (args...) ->
         id = $(this).attr('id')
+        return if jyt.YTplayers[id] is undefined
         player = jyt.YTplayers[id]
-        return if player is undefined
         return if player.initialized is false
         player[name]?.apply(player, args)
         
@@ -259,4 +272,7 @@ do (window, $ = window.jQuery) ->
     $::toggleFullscreen = ->
       toggleFullscreen($(this)[0])
     
+  # you can choose to initiate with either iframe or flash
+  # jyt.init('iframe')
+  # jyt.init('flash')
   jyt.init()

@@ -11,15 +11,15 @@
       this.ApiReady = false;
       ua = window.navigator.userAgent.toLowerCase();
       this.platform = {
-        isIE8: ua.match(/msie 8/) !== null,
-        isIE9: ua.match(/msie 9/) !== null
+        isIE8: ua.match(/msie 8/) !== null
       };
-      this.feature = feature || (this.platform.isIE8 || this.platform.isIE9 ? 'flash' : 'iframe');
+      this.feature = feature || (this.platform.isIE8 ? 'flash' : 'iframe');
       this[this.feature].init();
       return this.registerPackage();
     };
     jyt.onApiReady = function() {
       var id, value, _ref, _results;
+      console.log(this.feature, 'API ready, initialize Video.');
       this.ApiReady = true;
       _ref = this.YTplayers;
       _results = [];
@@ -56,6 +56,7 @@
     jyt.iframe = {
       init: function() {
         var firstScriptTag, tag;
+        console.log('init iframe');
         window.onYouTubeIframeAPIReady = (function(_this) {
           return function() {
             return jyt.onApiReady();
@@ -69,10 +70,10 @@
       initializeVideo: function(id, options) {
         var player;
         options.playerVars = options.playerVars || {};
-        options.playerVars.wmode = 'transparent';
+        options.playerVars.wmode = 'opaque';
         options.playerVars.html5 = 1;
         player = new YT.Player(id, {
-          wmode: 'transparent',
+          wmode: 'opaque',
           width: options.width,
           height: options.height,
           videoId: options.videoId,
@@ -100,14 +101,17 @@
             onError: options.onError
           }
         });
+        console.log('video initialized');
         return jyt.YTplayers[id] = player;
       }
     };
     jyt.flash = {
       init: function() {
         var firstScriptTag, tag;
+        console.log('init flash');
         tag = document.createElement('script');
         tag.onload = function() {
+          console.log('swfobject script load');
           return jyt.onApiReady();
         };
         tag.src = "http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js";
@@ -116,8 +120,9 @@
       },
       initializeVideo: function(id, options) {
         var urlParam;
+        console.log('flash initialiseVideo');
         options.playerVars = options.playerVars || {};
-        options.playerVars.wmode = 'transparent';
+        options.playerVars.wmode = 'opaque';
         options.playerVars.version = 3;
         options.playerVars.enablejsapi = 1;
         options.playerVars.playerapiid = options.videoId;
@@ -129,6 +134,7 @@
         });
         return window.onYouTubePlayerReady = function(videoId) {
           var player;
+          console.log('flash onYouTubePlayerReady');
           player = document.getElementById(id);
           window["" + id + "OnStateChange"] = function(e) {
             if (typeof options.onStateChange === "function") {
@@ -178,8 +184,10 @@
       this.onReady = options.onReady, this.onStateChange = options.onStateChange, this.onStart = options.onStart, this.onEnd = options.onEnd, this.onPlay = options.onPlay, this.onPause = options.onPause, this.onBuffer = options.onBuffer, this.onPlaybackQualityChange = options.onPlaybackQualityChange, this.onPlaybackRateChange = options.onPlaybackRateChange, this.onError = options.onError, this.onApiChange = options.onApiChange;
       jyt.YTplayers = jyt.YTplayers || {};
       if (jyt.ApiReady) {
+        console.log(jyt.feature, 'API ready, initialize Video.');
         return jyt[jyt.feature].initializeVideo(this.id, this);
       } else {
+        console.log(jyt.feature, 'API not ready, queue Video.');
         return jyt.pushToQueue(this.id, this);
       }
     };
@@ -193,10 +201,10 @@
           var args, id, player, _ref;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           id = $(this).attr('id');
-          player = jyt.YTplayers[id];
-          if (player === void 0) {
+          if (jyt.YTplayers[id] === void 0) {
             return;
           }
+          player = jyt.YTplayers[id];
           if (player.initialized === false) {
             return;
           }

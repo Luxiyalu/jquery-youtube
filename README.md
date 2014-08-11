@@ -37,10 +37,10 @@ bower install jquery-youtube
     bottom: 0;
     width: 100% !important;
     height: 100% !important;
-    #player-id{
-        width: 100% !important;
-        height: 100% !important;
-    }
+}
+#player-id{
+    width: 100% !important;
+    height: 100% !important;
 }
 ```
 

@@ -36,8 +36,6 @@ do (window, $ = window.jQuery) ->
     # feature detect
     @feature = feature || if @platform.isIE8 then 'flash' else 'iframe'
       
-    # flash feature would 
-    # if @feature is 'iframe' then @iframe.init()
     do @[@feature].init
     do @registerPackage
       
@@ -163,7 +161,6 @@ do (window, $ = window.jQuery) ->
         # don't listen to anonymous function here, because it has to be called
         # from within flash. It needs a string.
         jyt.YTplayers[id] = player
-        window.player = player
         return
     
   # Initialise with jQuery
@@ -211,10 +208,9 @@ do (window, $ = window.jQuery) ->
     @registerPackage('pause', 'pauseVideo')
     @registerPackage('stop', 'stopVideo')
     @registerPackage('clear', 'clearVideo')
-    @registerPackage('seekTo')
       
     for fn in [
-      'setSize', # player size
+      'seekTo', 'setSize', # player size
       'mute', 'unMute', 'isMuted', 'setVolume', 'getVolume', # volume related
       'getVideoLoadedFraction', 'getPlayerState', 'getCurrentTime', # playback status
       'setPlaybackRate', 'getPlaybackRate', 'getAvailablePlaybackRate', # playback rate
@@ -262,7 +258,6 @@ do (window, $ = window.jQuery) ->
       if $.fullscreenElement()
         $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen')
 
-          
     $.fullscreenElement = ->
       ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement
     $::enterFullscreen = ->

@@ -171,7 +171,6 @@
           player.addEventListener('onPlaybackRateChange', "" + id + "OnPlaybackRateChange");
           player.addEventListener('onPlaybackQualityChange', "" + id + "OnPlaybackQualityChange");
           jyt.YTplayers[id] = player;
-          window.player = player;
         };
       }
     };
@@ -215,8 +214,7 @@
       this.registerPackage('pause', 'pauseVideo');
       this.registerPackage('stop', 'stopVideo');
       this.registerPackage('clear', 'clearVideo');
-      this.registerPackage('seekTo');
-      _ref = ['setSize', 'mute', 'unMute', 'isMuted', 'setVolume', 'getVolume', 'getVideoLoadedFraction', 'getPlayerState', 'getCurrentTime', 'setPlaybackRate', 'getPlaybackRate', 'getAvailablePlaybackRate', 'getPlaybackQuality', 'setPlaybackQuality', 'getAvailableQualityLevels', 'getDuration', 'getVideoUrl', 'getVideoEmbedCode', 'addEventListener', 'removeEventListener', 'getIframe', 'destroy'];
+      _ref = ['seekTo', 'setSize', 'mute', 'unMute', 'isMuted', 'setVolume', 'getVolume', 'getVideoLoadedFraction', 'getPlayerState', 'getCurrentTime', 'setPlaybackRate', 'getPlaybackRate', 'getAvailablePlaybackRate', 'getPlaybackQuality', 'setPlaybackQuality', 'getAvailableQualityLevels', 'getDuration', 'getVideoUrl', 'getVideoEmbedCode', 'addEventListener', 'removeEventListener', 'getIframe', 'destroy'];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         fn = _ref[_i];
         this.registerPackage(fn);

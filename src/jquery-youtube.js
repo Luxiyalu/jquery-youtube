@@ -11,9 +11,11 @@
       this.ApiReady = false;
       ua = window.navigator.userAgent.toLowerCase();
       this.platform = {
-        isIE8: ua.match(/msie 8/) !== null
+        isIE8: ua.match(/msie 8/) !== null,
+        isIE9: ua.match(/msie 9/) !== null,
+        isIE10: ua.match(/msie 10/) !== null
       };
-      this.feature = feature || (this.platform.isIE8 ? 'flash' : 'iframe');
+      this.feature = feature || (this.platform.isIE8 || this.platform.isIE9 || this.platform.isIE10 ? 'flash' : 'iframe');
       this[this.feature].init();
       return this.registerPackage();
     };
@@ -128,7 +130,8 @@
         options.playerVars.playerapiid = options.videoId;
         urlParam = jyt.util.objToUrl(options.playerVars);
         swfobject.embedSWF("http://www.youtube.com/v/" + options.videoId + urlParam, id, options.width, options.height, "8", null, null, {
-          allowScriptAccess: 'always'
+          allowScriptAccess: 'always',
+          wmode: 'transparent'
         }, {
           id: id
         });

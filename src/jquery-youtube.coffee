@@ -32,9 +32,13 @@ do (window, $ = window.jQuery) ->
     ua = window.navigator.userAgent.toLowerCase()
     @platform =
       isIE8: ua.match(/msie 8/) isnt null
+      isIE9: ua.match(/msie 9/) isnt null
+      isIE10: ua.match(/msie 10/) isnt null
       
-    # feature detect
-    @feature = feature || if @platform.isIE8 then 'flash' else 'iframe'
+    # feature detect:
+    # use javascript api with ie9/10, because the iframe flash api tends to jump to 0 on buffer after quality change
+    @feature = feature || if @platform.isIE8 || @platform.isIE9 || @platform.isIE10 then 'flash' else 'iframe'
+
       
     do @[@feature].init
     do @registerPackage
@@ -131,7 +135,7 @@ do (window, $ = window.jQuery) ->
       urlParam = jyt.util.objToUrl(options.playerVars)
       swfobject.embedSWF "http://www.youtube.com/v/#{options.videoId}#{urlParam}",
         id, options.width, options.height, "8", null, null,
-        {allowScriptAccess: 'always'}, {id: id}
+        {allowScriptAccess: 'always', wmode: 'transparent'}, {id: id}
         
       # Register onReady event
       window.onYouTubePlayerReady = (videoId) ->

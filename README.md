@@ -5,7 +5,7 @@
 2. Lays out events by name instead of the original state change 1, 2, 3... (```onReady, onStart, onPause, onEnd...```)
 3. Adds API for full-screen feature ```$('#player').toggleFullScreen()```
 4. Adds a patch for the wmode issue
-5. Ensured API compatibility for IE10
+5. Ensured API compatibility for IE10/9
 5. Solves bug on OSX Safari, when user had installed flash previously
 
 ## How to install

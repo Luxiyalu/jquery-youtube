@@ -233,34 +233,38 @@ do (window, $ = window.jQuery) ->
         ele.msRequestFullscreen?()
         ele.mozRequestFullScreen?()
         ele.webkitRequestFullscreen?(Element.ALLOW_KEYBOARD_INPUT)
+      $(ele).addClass('ytplayer-fullscreen')
         
-    exitFullscreen = (ele) ->
+    exitFullscreen = ->
       if document.exitFullscreen
         document.exitFullscreen()
       else
         document.msExitFullscreen?()
         document.mozCancelFullScreen?()
         document.webkitExitFullscreen?()
+      $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen')
         
     toggleFullscreen = (ele) ->
       if !$.fullscreenElement()
-        # doesn't have full screen element yet
         enterFullscreen(ele)
-        $(ele).addClass('ytplayer-fullscreen')
       else
-        # some element is already full-screened
-        exitFullscreen(ele)
-        $(ele).removeClass('ytplayer-fullscreen')
+        exitFullscreen()
 
-    # fix esc exit
-    $(document).on 'keyup', (e) ->
-      if e.which is 27 && $('.ytplayer-fullscreen').length > 0
-        $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen')
+    fullScreenEventName = ->
+      console.log 'fullScreenEventName evoked'
+      if document.msExitFullscreen?
+        return 'MSFullscreenChange'
+      if document.mozCancelFullScreen?
+        return 'mozfullscreenchange'
+      if document.webkitExitFullscreen?
+        return 'webkitfullscreenchange'
+      else
+        ''
 
-    # fix for firefox since it doesn't detect esc keystroke when fullscreen
-    $(window).on 'resize', ->
-      if $.fullscreenElement()
-        $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen')
+    document.addEventListener fullScreenEventName(), ->
+      # fix for firefox since it doesn't detect esc keystroke when fullscreen
+      if !$.fullscreenElement()
+        exitFullscreen()
 
     $.fullscreenElement = ->
       ele = document.fullScreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement

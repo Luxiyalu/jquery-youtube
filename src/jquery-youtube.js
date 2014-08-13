@@ -194,7 +194,7 @@
       }
     };
     jyt.registerPackage = function() {
-      var enterFullscreen, exitFullscreen, fn, toggleFullscreen, _i, _len, _ref;
+      var enterFullscreen, exitFullscreen, fn, fullScreenEventName, toggleFullscreen, _i, _len, _ref;
       this.registerPackage = function(alias, name) {
         if (name == null) {
           name = alias;
@@ -224,7 +224,7 @@
       }
       enterFullscreen = function(ele) {
         if (document.documentElement.requestFullscreen) {
-          return ele.requestFullscreen();
+          ele.requestFullscreen();
         } else {
           if (typeof ele.msRequestFullscreen === "function") {
             ele.msRequestFullscreen();
@@ -232,12 +232,15 @@
           if (typeof ele.mozRequestFullScreen === "function") {
             ele.mozRequestFullScreen();
           }
-          return typeof ele.webkitRequestFullscreen === "function" ? ele.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT) : void 0;
+          if (typeof ele.webkitRequestFullscreen === "function") {
+            ele.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+          }
         }
+        return $(ele).addClass('ytplayer-fullscreen');
       };
-      exitFullscreen = function(ele) {
+      exitFullscreen = function() {
         if (document.exitFullscreen) {
-          return document.exitFullscreen();
+          document.exitFullscreen();
         } else {
           if (typeof document.msExitFullscreen === "function") {
             document.msExitFullscreen();
@@ -245,26 +248,36 @@
           if (typeof document.mozCancelFullScreen === "function") {
             document.mozCancelFullScreen();
           }
-          return typeof document.webkitExitFullscreen === "function" ? document.webkitExitFullscreen() : void 0;
+          if (typeof document.webkitExitFullscreen === "function") {
+            document.webkitExitFullscreen();
+          }
         }
+        return $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen');
       };
       toggleFullscreen = function(ele) {
         if (!$.fullscreenElement()) {
-          enterFullscreen(ele);
-          return $(ele).addClass('ytplayer-fullscreen');
+          return enterFullscreen(ele);
         } else {
-          exitFullscreen(ele);
-          return $(ele).removeClass('ytplayer-fullscreen');
+          return exitFullscreen();
         }
       };
-      $(document).on('keyup', function(e) {
-        if (e.which === 27 && $('.ytplayer-fullscreen').length > 0) {
-          return $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen');
+      fullScreenEventName = function() {
+        console.log('fullScreenEventName evoked');
+        if (document.msExitFullscreen != null) {
+          return 'MSFullscreenChange';
         }
-      });
-      $(window).on('resize', function() {
-        if ($.fullscreenElement()) {
-          return $('.ytplayer-fullscreen').removeClass('ytplayer-fullscreen');
+        if (document.mozCancelFullScreen != null) {
+          return 'mozfullscreenchange';
+        }
+        if (document.webkitExitFullscreen != null) {
+          return 'webkitfullscreenchange';
+        } else {
+          return '';
+        }
+      };
+      document.addEventListener(fullScreenEventName(), function() {
+        if (!$.fullscreenElement()) {
+          return exitFullscreen();
         }
       });
       $.fullscreenElement = function() {

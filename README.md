@@ -46,7 +46,7 @@ bower install jquery-youtube
 
 #### JavaScript
 ```javascript
-// Initiating
+// Initialise
 $('#ytplayer').YTplayer({});
 
 // With configurations
@@ -90,7 +90,7 @@ $('#ytplayer').YTplayer({
 ```
 
 ## API
-After the initiation, you could access the player like this: ```$('#ytplayer').pause()```. The APIs include:
+After initialisation, you could access the player like this: ```$('#ytplayer').pause()```. The APIs include:
 
 ```javascript
 // Playing a video

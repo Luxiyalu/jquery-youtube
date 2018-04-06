@@ -10,7 +10,7 @@
 
 ## How to install
 ```
-yarn install jquery-youtube
+yarn add jquery-youtube
 ```
 
 ## How to use
